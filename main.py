@@ -3,10 +3,13 @@ import sys
 
 import numpy as np
 import pygame
+import matrix_mdp
 
 import constants
 from House import House
 from Townhall import Townhall
+
+from GametoNumpy import PyGametoNumpy as pgnp
 
 
 def check_building_collision(new_building, buildings):
@@ -39,6 +42,11 @@ def main():
                     selected_building_type = Townhall
                 elif event.key == pygame.K_r:
                     rotated = not rotated
+                # begin q-learning with the current input buildings
+                elif event.key == pygame.K_RETURN:
+                    map = pgnp.convert_to_numpy(constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings)
+                    
+                    
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     x, y = event.pos
@@ -51,6 +59,9 @@ def main():
                         buildings.append(new_building)
                     else:
                         continue
+            
+                
+
 
         for i in range(constants.GRID_WIDTH + 1):
             pygame.draw.line(screen, constants.WHITE, (i * constants.GRID_SIZE, 0),

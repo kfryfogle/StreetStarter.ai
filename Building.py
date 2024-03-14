@@ -22,3 +22,9 @@ class Building:
     def get_rect(self):
         return pygame.Rect(self.x * constants.GRID_SIZE, self.y * constants.GRID_SIZE, self.width * constants.GRID_SIZE,
                            self.height * constants.GRID_SIZE)
+    
+    def get_position(self):
+        return self.x, self.y
+    
+    def get_size(self):
+        return self.width, self.height
