@@ -134,8 +134,7 @@ class Qlearning:
                 # print(self.reward_grid[next_observation, observation, action])
                 # print(reward)
                 # print("___________________________________")
-                if self.map[next_observation % constants.GRID_WIDTH, next_observation // constants.GRID_WIDTH] != 0:
-                    continue
+
                 eta = 1 / (1 + num_updates[observation, action])
                 best_next_action = np.argmax(Q[next_observation])
                 Q[observation, action] += eta * (
