@@ -5,11 +5,11 @@ import numpy as np
 import pygame
 
 import constants
+from Building import Building
 from House import House
 from Townhall import Townhall
 
 from Qlearning import Qlearning
-
 
 
 def check_building_collision(new_building, buildings):
@@ -20,6 +20,14 @@ def check_building_collision(new_building, buildings):
     return False
 
 
+def check_if_out_of_bounds(new_building):
+    x, y = new_building.get_position()
+    w, h = new_building.get_size()
+    if x + w > constants.GRID_WIDTH or y + h > constants.GRID_HEIGHT:
+        return True
+    return False
+
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
@@ -27,7 +35,7 @@ def main():
 
     buildings = []
     rotated = False
-    selected_building_type = House
+    selected_building_type = Building
     screen.fill(constants.BLACK)
 
     while True:
@@ -45,9 +53,8 @@ def main():
                 # begin q-learning with the current input buildings
                 elif event.key == pygame.K_RETURN:
                     qlearning = Qlearning(constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings)
-                    
-
-                    
+                    best_policy = qlearning.train(10000)
+                    print(best_policy.tolist())
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     x, y = event.pos
@@ -56,13 +63,10 @@ def main():
                     new_building = selected_building_type(x, y)
                     if rotated:
                         new_building.rotate()
-                    if not check_building_collision(new_building, buildings):
+                    if not check_building_collision(new_building, buildings) and not check_if_out_of_bounds(new_building):
                         buildings.append(new_building)
                     else:
                         continue
-            
-                
-
 
         for i in range(constants.GRID_WIDTH + 1):
             pygame.draw.line(screen, constants.WHITE, (i * constants.GRID_SIZE, 0),
