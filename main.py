@@ -86,8 +86,8 @@ def main():
                 # begin q-learning with the current input buildings
                 elif event.key == pygame.K_RETURN:
                     qlearning = Qlearning(constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings)
-                    best_policy, starting_index = qlearning.train(10000)
-                    # print(best_policy.tolist())
+                    best_policy, starting_index = qlearning.train(100)
+                    print(best_policy.tolist())
                     # print(Q.tolist())
                     paint(best_policy, starting_index % constants.GRID_WIDTH, starting_index // constants.GRID_WIDTH)
             elif event.type == pygame.MOUSEBUTTONDOWN:

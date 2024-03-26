@@ -72,7 +72,7 @@ class Qlearning:
                 #     self.T[x, y, :] = 0
                 # else:
                 neighbors = self.valid_neighbours(x, y)
-                if x == 1 and y == 6:
+                if x == 1 and y == 0:
                     print(self.map)
                     print(neighbors)
                 for action in range(self.num_actions):
@@ -110,7 +110,7 @@ class Qlearning:
         num_updates = np.zeros((self.num_states, self.num_actions))
 
         gamma = 0.95
-        epsilon = 0.9
+        epsilon = 0.97
 
         observation, info = self.env.reset()
         optimal_policy = np.zeros(self.num_states)
