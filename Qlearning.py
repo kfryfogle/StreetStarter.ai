@@ -3,6 +3,11 @@ import random
 import numpy as np
 import gymnasium as gym
 from tqdm import tqdm
+import sys
+
+import constants
+
+np.set_printoptions(threshold=sys.maxsize)
 
 import matrix_mdp
 
@@ -32,11 +37,13 @@ class Qlearning:
 
         # Create P_0 for starting state distribution
         self.P_0 = np.array([0 for _ in range(self.num_states)])
-        self.P_0[self.current_building.get_position()[0] - 1 + self.current_building.get_position()[1] *
-                 self.width] = 1
+        self.starting_index =self.current_building.get_position()[0] - 1 + self.current_building.get_position()[1] * self.width
+        self.P_0[self.starting_index] = 1
+        print(self.P_0)
         self.T = np.zeros((self.num_states, self.num_states, self.num_actions))
         self.create_transition_matrix()
         print(self.T)
+        print(self.reward_grid)
         # # initialize the Q-table values to 0
         # self.q_table = np.zeros([self.width * self.height, 4])
         # # initialize number of updates for each state-action pair to 0
@@ -46,29 +53,34 @@ class Qlearning:
 
     def valid_neighbours(self, i, j):
         neighbours = {}
-        if i > 0:
+        if i > 0 and self.map[i-1, j] == 0:
             neighbours[0] = (i - 1, j)
-        if i < self.width - 1:
+        if i < self.width - 1 and self.map[i+1, j] == 0:
             neighbours[1] = (i + 1, j)
-        if j > 0:
+        if j > 0 and self.map[i, j-1] == 0:
             neighbours[2] = (i, j - 1)
-        if j < self.height - 1:
+        if j < self.height - 1 and self.map[i, j+1] == 0:
             neighbours[3] = (i, j + 1)
         return neighbours
 
     def create_transition_matrix(self):
         for x in range(self.width):
             for y in range(self.height):
-                if self.map[x][y] != 0:
-                    self.T[x, y, :] = 0
-                else:
-                    neighbors = self.valid_neighbours(x, y)
-                    for action in range(self.num_actions):
-                        if action in neighbors:
-                            # print(str(neighbors[action][0] * self.width + neighbors[action][1]) + "\n_____")
-                            # print(str(neighbors[action][1]) + "\n_____")
-                            self.T[neighbors[action][0] * self.width + neighbors[action][
-                                1], x * self.width + y, action] = 1
+                # if (self.reward_grid[:, x + self.width * y, :] != -1).any():
+                #     continue
+                # if self.map[x, y] != 0:
+                #     self.T[x, y, :] = 0
+                # else:
+                neighbors = self.valid_neighbours(x, y)
+                if x == 1 and y == 6:
+                    print(self.map)
+                    print(neighbors)
+                for action in range(self.num_actions):
+                    if action in neighbors:
+                        # print(str(neighbors[action][0] * self.width + neighbors[action][1]) + "\n_____")
+                        # print(str(neighbors[action][1]) + "\n_____")
+                        self.T[neighbors[action][0] * self.width + neighbors[action][
+                            1], x * self.width + y, action] = 1
                     # for action in range(4):
                     #     new_y, new_x = y, x
                     #     if action == 0:  # Up
@@ -93,10 +105,11 @@ class Qlearning:
             return False
 
     def train(self, num_episodes):
+        # return np.array([])
         Q = np.zeros((self.num_states, self.num_actions))
         num_updates = np.zeros((self.num_states, self.num_actions))
 
-        gamma = 0.9
+        gamma = 0.95
         epsilon = 0.9
 
         observation, info = self.env.reset()
@@ -116,7 +129,13 @@ class Qlearning:
                     action = np.random.choice(np.arange(self.num_actions))
 
                 next_observation, reward, terminated, truncated, info = self.env.step(action)
-
+                # print(next_observation, observation)
+                # print(action)
+                # print(self.reward_grid[next_observation, observation, action])
+                # print(reward)
+                # print("___________________________________")
+                if self.map[next_observation % constants.GRID_WIDTH, next_observation // constants.GRID_WIDTH] != 0:
+                    continue
                 eta = 1 / (1 + num_updates[observation, action])
                 best_next_action = np.argmax(Q[next_observation])
                 Q[observation, action] += eta * (
@@ -130,4 +149,4 @@ class Qlearning:
             epsilon *= 0.9999
 
         optimal_policy = np.argmax(Q, axis=1)
-        return optimal_policy
+        return optimal_policy, self.starting_index

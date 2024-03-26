@@ -11,6 +11,13 @@ from Townhall import Townhall
 
 from Qlearning import Qlearning
 
+pygame.init()
+screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
+pygame.display.set_caption("StreetStarter.ai")
+
+screen.fill(constants.BLACK)
+clock = pygame.time.Clock()
+
 
 def check_building_collision(new_building, buildings):
     new_building_rect = new_building.get_rect()
@@ -28,16 +35,42 @@ def check_if_out_of_bounds(new_building):
     return False
 
 
-def main():
-    pygame.init()
-    screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
-    pygame.display.set_caption("StreetStarter.ai")
+def paint(policy, start_x, start_y):
+    grid = np.array(policy).reshape(constants.GRID_WIDTH, constants.GRID_HEIGHT)
 
+    # Map the values in the grid according to the specified mapping
+    mapping = {0: 'up', 1: 'down', 2: 'left', 3: 'right'}
+    direction_array = np.vectorize(mapping.get)(grid)
+
+    current_x, current_y = start_x, start_y
+    i = 0
+    while i < 70:
+        direction = direction_array[current_y, current_x]
+        color = constants.BLUE
+        rect = pygame.Rect(current_x * constants.GRID_SIZE, current_y * constants.GRID_SIZE,
+                           constants.GRID_SIZE, constants.GRID_SIZE)
+        pygame.draw.rect(screen, color, rect)
+
+        # Update current position based on direction
+        if direction == 'up' and current_y > 0:
+            current_y -= 1
+        elif direction == 'down' and current_y < direction_array.shape[0] - 1:
+            current_y += 1
+        elif direction == 'left' and current_x > 0:
+            current_x -= 1
+        elif direction == 'right' and current_x < direction_array.shape[1] - 1:
+            current_x += 1
+        i += 1
+
+    # Update the display
+    pygame.display.flip()
+    clock.tick(60)
+
+
+def main():
     buildings = []
     rotated = False
     selected_building_type = Building
-    screen.fill(constants.BLACK)
-
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -53,8 +86,10 @@ def main():
                 # begin q-learning with the current input buildings
                 elif event.key == pygame.K_RETURN:
                     qlearning = Qlearning(constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings)
-                    best_policy = qlearning.train(10000)
-                    print(best_policy.tolist())
+                    best_policy, starting_index = qlearning.train(10000)
+                    # print(best_policy.tolist())
+                    # print(Q.tolist())
+                    paint(best_policy, starting_index % constants.GRID_WIDTH, starting_index // constants.GRID_WIDTH)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     x, y = event.pos
@@ -63,7 +98,8 @@ def main():
                     new_building = selected_building_type(x, y)
                     if rotated:
                         new_building.rotate()
-                    if not check_building_collision(new_building, buildings) and not check_if_out_of_bounds(new_building):
+                    if not check_building_collision(new_building, buildings) and not check_if_out_of_bounds(
+                            new_building):
                         buildings.append(new_building)
                     else:
                         continue
