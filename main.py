@@ -35,7 +35,7 @@ def check_if_out_of_bounds(new_building):
     return False
 
 
-def paint(policy, start_x, start_y):
+def paint(policy, start_x, start_y, paths):
     grid = np.array(policy).reshape(constants.GRID_WIDTH, constants.GRID_HEIGHT)
 
     # Map the values in the grid according to the specified mapping
@@ -47,6 +47,7 @@ def paint(policy, start_x, start_y):
     while i < 70:
         direction = direction_array[current_y, current_x]
         color = constants.BLUE
+        paths[current_x, current_y] = 1
         rect = pygame.Rect(current_x * constants.GRID_SIZE, current_y * constants.GRID_SIZE,
                            constants.GRID_SIZE, constants.GRID_SIZE)
         pygame.draw.rect(screen, color, rect)
@@ -70,6 +71,7 @@ def paint(policy, start_x, start_y):
 def main():
     buildings = []
     rotated = False
+    paths = np.zeros((constants.GRID_WIDTH, constants.GRID_HEIGHT))
     selected_building_type = Building
     while True:
         for event in pygame.event.get():
@@ -85,11 +87,15 @@ def main():
                     rotated = not rotated
                 # begin q-learning with the current input buildings
                 elif event.key == pygame.K_RETURN:
-                    qlearning = Qlearning(constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings)
+                    if len(buildings) > 2:
+                        after_first = True
+                    else:
+                        after_first = False
+                    qlearning = Qlearning(constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings, after_first, paths)
                     best_policy, starting_index = qlearning.train(100)
                     print(best_policy.tolist())
                     # print(Q.tolist())
-                    paint(best_policy, starting_index % constants.GRID_WIDTH, starting_index // constants.GRID_WIDTH)
+                    paint(best_policy, starting_index % constants.GRID_WIDTH, starting_index // constants.GRID_WIDTH, paths)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     x, y = event.pos

@@ -15,12 +15,14 @@ from GametoNumpy import PyGametoNumpy
 
 
 class Qlearning:
-    def __init__(self, width, height, buildings):
+    def __init__(self, width, height, buildings, after_first, paths):
         # Hyperparameters
         self.epsilon = 0.9
         self.gamma = 0.9
         self.episodes = 1000
         self.steps_per_episode = 100
+        self.after_first = after_first
+        self.paths = paths
 
         # Mapping of the game
         self.width = width
@@ -29,10 +31,15 @@ class Qlearning:
         self.num_actions = 4
         self.actions = ['up', 'down', 'left', 'right']
         self.buildings = buildings
-        self.current_building = buildings[0]
+        if after_first:
+            self.current_building = buildings[-1]
+        else:
+            self.current_building = buildings[0]
         gtnp = PyGametoNumpy(height, width, buildings)
         self.map = gtnp.convert_to_numpy()
         # self.reward_grid = gtnp.create_rewards(buildings)
+        if after_first:
+            self.reward_grid = gtnp.create_reward_after_first(paths)
         self.reward_grid = gtnp.create_reward_first_step(buildings)
 
         # Create P_0 for starting state distribution
@@ -144,6 +151,10 @@ class Qlearning:
 
                 if terminated or truncated:
                     break
+
+                if self.after_first:
+                    if reward > 0:
+                        break
 
             epsilon *= 0.9999
 
