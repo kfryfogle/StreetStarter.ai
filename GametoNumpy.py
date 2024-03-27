@@ -120,61 +120,8 @@ class PyGametoNumpy:
         self.reward_grid[bottom_edges[0], bottom_edges[0] - 1, 3] = 200
         self.reward_grid[right_edges[-1], bottom_edges[-1] + 1, 0] = 200
         self.reward_grid[bottom_edges[-1], bottom_edges[-1] + 1, 2] = 200
-        # # Update rewards around the first building
-        # for i in range(first_building_height):
-        #     # Left edge
-        #     if first_building_x - 2 >= 0:
-        #         self.reward_grid[first_building_x - 1, first_building_x - 2,
-        #         3] = 200  # Right action towards the building
-        #     # Right edge
-        #     if first_building_x + first_building_width + 1 < grid_width:
-        #         self.reward_grid[first_building_x + first_building_width, first_building_x + first_building_width + 1,
-        #         2] = 200  # Left action towards the building
-        #
-        # for i in range(first_building_width):
-        #     # Top edge
-        #     if first_building_y - 2 >= 0:
-        #         self.reward_grid[first_building_y - 2, first_building_y - 1,
-        #         1] = 200  # Down action towards the building
-        #     # Bottom edge
-        #     if first_building_y + first_building_height + 1 < grid_height:
-        #         self.reward_grid[first_building_y + first_building_height, first_building_y + first_building_height + 1,
-        #         0] = 200  # Up action towards the building
-        #
-        # self.reward_grid[first_building_y - 1, ]
-
         return self.reward_grid
-        # for i in range(constants.GRID_HEIGHT):
-        #     for j in range(constants.GRID_WIDTH):
-        #         self.reward_grid[i][j] = -1
-        #
-        # first_building_to_connect_width = buildings[1].get_size()[0]
-        # first_building_to_connect_height = buildings[1].get_size()[1]
-        # first_building_to_connect_x = buildings[1].get_position()[0]
-        # first_building_to_connect_y = buildings[1].get_position()[1]
-        # print(first_building_to_connect_x, first_building_to_connect_y, first_building_to_connect_width,
-        #       first_building_to_connect_height)
-        # for i in range(first_building_to_connect_height):
-        #     # Check if the left edge of the rectangle is within the bounds of the grid
-        #     if first_building_to_connect_x - 1 >= 0:
-        #         self.reward_grid[first_building_to_connect_y + i][first_building_to_connect_x - 1] = 200
-        #
-        #     # Check if the right edge of the rectangle is within the bounds of the grid
-        #     if first_building_to_connect_x + first_building_to_connect_width < len(self.reward_grid[0]):
-        #         self.reward_grid[first_building_to_connect_y + i][
-        #             first_building_to_connect_x + first_building_to_connect_width] = 200
-        #
-        # for i in range(first_building_to_connect_width):
-        #     # Check if the top edge of the rectangle is within the bounds of the grid
-        #     if first_building_to_connect_y - 1 >= 0:
-        #         self.reward_grid[first_building_to_connect_y - 1][first_building_to_connect_x + i] = 200
-        #
-        #     # Check if the bottom edge of the rectangle is within the bounds of the grid
-        #     if first_building_to_connect_y + first_building_to_connect_height < len(self.reward_grid):
-        #         self.reward_grid[first_building_to_connect_y + first_building_to_connect_height][
-        #             first_building_to_connect_x + i] = 200
-        #
-        # return self.reward_grid
+        
 
     def convert_to_numpy(self):
         print("Enter Key Pressed")

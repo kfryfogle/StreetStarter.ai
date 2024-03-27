@@ -70,8 +70,8 @@ def paint(policy, start_x, start_y):
 def main():
     buildings = []
     rotated = False
-    selected_building_type = Building
-    while True:
+    selected_building_type = House
+    while True: 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
