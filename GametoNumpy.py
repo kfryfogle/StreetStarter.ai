@@ -95,10 +95,10 @@ class PyGametoNumpy:
             bottom_edges.append(
                 first_building_x + grid_width * first_building_y + first_building_height * grid_width + i)
 
-        print(left_edges)
-        print(right_edges)
-        print(top_edges)
-        print(bottom_edges)
+        # print(left_edges)
+        # print(right_edges)
+        # print(top_edges)
+        # print(bottom_edges)
 
         for i in range(len(left_edges)):
             if left_edges[i] - 1 >= grid_width * (i + first_building_y):
@@ -112,6 +112,7 @@ class PyGametoNumpy:
             if bottom_edges[i] + grid_width <= self.num_states - 1:
                 self.reward_grid[bottom_edges[i], bottom_edges[i] + grid_width, 0] = 200
 
+        # TODO: fix when one of these indices are out of bounds eg. when building is along an edge of grid
         self.reward_grid[top_edges[0], top_edges[0] - 1, 3] = 200
         self.reward_grid[top_edges[-1], top_edges[-1] + 1, 2] = 200
         self.reward_grid[left_edges[0], top_edges[0] - 1, 1] = 200

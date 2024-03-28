@@ -37,13 +37,14 @@ class Qlearning:
 
         # Create P_0 for starting state distribution
         self.P_0 = np.array([0 for _ in range(self.num_states)])
-        self.starting_index =self.current_building.get_position()[0] - 1 + self.current_building.get_position()[1] * self.width
+        self.starting_index = self.current_building.get_position()[0] - 1 + self.current_building.get_position()[
+            1] * self.width
         self.P_0[self.starting_index] = 1
-        print(self.P_0)
+        # print(self.P_0)
         self.T = np.zeros((self.num_states, self.num_states, self.num_actions))
         self.create_transition_matrix()
-        print(self.T)
-        print(self.reward_grid)
+        # print(self.T)
+        # print(self.reward_grid)
         # # initialize the Q-table values to 0
         # self.q_table = np.zeros([self.width * self.height, 4])
         # # initialize number of updates for each state-action pair to 0
@@ -53,13 +54,13 @@ class Qlearning:
 
     def valid_neighbours(self, i, j):
         neighbours = {}
-        if i > 0 and self.map[i-1, j] == 0:
+        if i > 0 and self.map[i - 1, j] == 0:
             neighbours[0] = (i - 1, j)
-        if i < self.width - 1 and self.map[i+1, j] == 0:
+        if i < self.width - 1 and self.map[i + 1, j] == 0:
             neighbours[1] = (i + 1, j)
-        if j > 0 and self.map[i, j-1] == 0:
+        if j > 0 and self.map[i, j - 1] == 0:
             neighbours[2] = (i, j - 1)
-        if j < self.height - 1 and self.map[i, j+1] == 0:
+        if j < self.height - 1 and self.map[i, j + 1] == 0:
             neighbours[3] = (i, j + 1)
         return neighbours
 
@@ -72,7 +73,7 @@ class Qlearning:
                 #     self.T[x, y, :] = 0
                 # else:
                 neighbors = self.valid_neighbours(x, y)
-                if x == 1 and y == 0:
+                if x ==1 and y == 2:
                     print(self.map)
                     print(neighbors)
                 for action in range(self.num_actions):

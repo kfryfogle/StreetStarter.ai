@@ -36,6 +36,7 @@ def check_if_out_of_bounds(new_building):
 
 
 def paint(policy, start_x, start_y):
+    # TODO: cut off extra path
     grid = np.array(policy).reshape(constants.GRID_WIDTH, constants.GRID_HEIGHT)
 
     # Map the values in the grid according to the specified mapping
@@ -86,7 +87,7 @@ def main():
                 # begin q-learning with the current input buildings
                 elif event.key == pygame.K_RETURN:
                     qlearning = Qlearning(constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings)
-                    best_policy, starting_index = qlearning.train(100)
+                    best_policy, starting_index = qlearning.train(100000)
                     print(best_policy.tolist())
                     # print(Q.tolist())
                     paint(best_policy, starting_index % constants.GRID_WIDTH, starting_index // constants.GRID_WIDTH)
