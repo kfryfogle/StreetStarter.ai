@@ -35,6 +35,7 @@ class PyGametoNumpy:
         #     queue = deque()
         #     visited = set()
         #
+        
         #     for bx in range(x, x + w):
         #         for by in range(y, y + h):
         #             add_surrounding_cells_to_queue(bx, by, 0)
@@ -74,52 +75,94 @@ class PyGametoNumpy:
                 for action in range(num_actions):
                     self.reward_grid[i, j, action] = -1  # Default reward
 
+
+        print(buildings)
+        for building in buildings:    
+            x, y = building.get_position()
+            w, h = building.get_size()
+            reward = 200
+
+            left_edges = []
+            right_edges = []
+            top_edges = []
+            bottom_edges = []
+            
+            q = queue.Queue()
+
+            state_of_building = x + grid_width * y
+            q.put((state_of_building, 0))
+
+            while not q.empty():
+                parent, distance = q.get()
+                
+                if distance == 4:
+                    break
+
+                top_edges = parent-grid_width
+                bottom_edges = parent+grid_width
+                left_edges = parent-1
+                right_edges = parent+1
+
+                q.put((top_edges, distance+1))
+                q.put((bottom_edges, distance+1))
+                q.put((left_edges, distance+1))
+                q.put((right_edges, distance+1))
+
+                self.reward_grid[parent, top_edges, 1] = reward - distance *50
+                self.reward_grid[parent, bottom_edges, 0] = reward - distance *50
+                self.reward_grid[left_edges, parent, 3] = reward - distance *50
+                self.reward_grid[right_edges, parent, 2] = reward - distance *50
+
+            
         # Extract building information
-        first_building_width = buildings[1].get_size()[0]
-        first_building_height = buildings[1].get_size()[1]
-        first_building_x = buildings[1].get_position()[0]
-        first_building_y = buildings[1].get_position()[1]
+        # first_building_width = buildings[-1].get_size()[0]
+        # first_building_height = buildings[-1].get_size()[1]
+        # first_building_x = buildings[-1].get_position()[0]
+        # first_building_y = buildings[-1].get_position()[1]
+        # print("first building:-",first_building_x, first_building_y, first_building_width, first_building_height)
+        
 
-        left_edges = []
-        right_edges = []
-        top_edges = []
-        bottom_edges = []
-        # Get left and right edges
-        for i in range(first_building_height):
-            left_edges.append(first_building_x + grid_width * first_building_y + i * grid_width - 1)
-            right_edges.append(first_building_x + grid_width * first_building_y + i * grid_width + first_building_width)
+        # left_edges = []
+        # right_edges = []
+        # top_edges = []
+        # bottom_edges = []
+        # # Get left and right edges
+        # for i in range(first_building_height):
+        #     left_edges.append(first_building_x + grid_width * first_building_y + i * grid_width - 1)
+        #     right_edges.append(first_building_x + grid_width * first_building_y + i * grid_width + first_building_width)
 
-        # Get top and bottom edges
-        for i in range(first_building_width):
-            top_edges.append(first_building_x + grid_width * first_building_y - grid_width + i)
-            bottom_edges.append(
-                first_building_x + grid_width * first_building_y + first_building_height * grid_width + i)
+        # # Get top and bottom edges
+        # for i in range(first_building_width):
+        #     top_edges.append(first_building_x + grid_width * first_building_y - grid_width + i)
+        #     bottom_edges.append(
+        #         first_building_x + grid_width * first_building_y + first_building_height * grid_width + i)
 
-        print(left_edges)
-        print(right_edges)
-        print(top_edges)
-        print(bottom_edges)
+        # # print("left:-",left_edges)
+        # # print("right:-",right_edges)
+        # # print("top:-",top_edges)
+        # # print("bottom:-",bottom_edges)
 
-        for i in range(len(left_edges)):
-            if left_edges[i] - 1 >= grid_width * (i + first_building_y):
-                self.reward_grid[left_edges[i], left_edges[i] - 1, 3] = 200
-            if right_edges[i] + 1 <= grid_width * (i + first_building_y + 1) - 1:
-                self.reward_grid[right_edges[i], right_edges[i] + 1, 2] = 200
+        # for i in range(len(left_edges)):
+        #     if left_edges[i] - 1 >= grid_width * (i + first_building_y):
+        #         self.reward_grid[left_edges[i], left_edges[i] - 1, 3] = 200
+        #     if right_edges[i] + 1 <= grid_width * (i + first_building_y + 1) - 1:
+        #         self.reward_grid[right_edges[i], right_edges[i] + 1, 2] = 200
 
-        for i in range(len(top_edges)):
-            if top_edges[i] - grid_width >= 0:
-                self.reward_grid[top_edges[i], top_edges[i] - grid_width, 1] = 200
-            if bottom_edges[i] + grid_width <= self.num_states - 1:
-                self.reward_grid[bottom_edges[i], bottom_edges[i] + grid_width, 0] = 200
+        # for i in range(len(top_edges)):
+        #     if top_edges[i] - grid_width >= 0:
+        #         self.reward_grid[top_edges[i], top_edges[i] - grid_width, 1] = 200
+        #     if bottom_edges[i] + grid_width <= self.num_states - 1:
+        #         self.reward_grid[bottom_edges[i], bottom_edges[i] + grid_width, 0] = 200
 
-        self.reward_grid[top_edges[0], top_edges[0] - 1, 3] = 200
-        self.reward_grid[top_edges[-1], top_edges[-1] + 1, 2] = 200
-        self.reward_grid[left_edges[0], top_edges[0] - 1, 1] = 200
-        self.reward_grid[right_edges[0], top_edges[-1] + 1, 1] = 200
-        self.reward_grid[left_edges[-1], bottom_edges[0] - 1, 0] = 200
-        self.reward_grid[bottom_edges[0], bottom_edges[0] - 1, 3] = 200
-        self.reward_grid[right_edges[-1], bottom_edges[-1] + 1, 0] = 200
-        self.reward_grid[bottom_edges[-1], bottom_edges[-1] + 1, 2] = 200
+        # self.reward_grid[top_edges[0], top_edges[0] - 1, 3] = 200
+        # self.reward_grid[top_edges[-1], top_edges[-1] + 1, 2] = 200
+        # self.reward_grid[left_edges[0], top_edges[0] - 1, 1] = 200
+        # self.reward_grid[right_edges[0], top_edges[-1] + 1, 1] = 200
+        # self.reward_grid[left_edges[-1], bottom_edges[0] - 1, 0] = 200
+        # self.reward_grid[bottom_edges[0], bottom_edges[0] - 1, 3] = 200
+        # self.reward_grid[right_edges[-1], bottom_edges[-1] + 1, 0] = 200
+        # self.reward_grid[bottom_edges[-1], bottom_edges[-1] + 1, 2] = 200
+        #print(self.reward_grid)
         return self.reward_grid
       
         # for i in range(constants.GRID_HEIGHT):

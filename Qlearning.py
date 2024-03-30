@@ -40,8 +40,10 @@ class Qlearning:
         # self.reward_grid = gtnp.create_rewards(buildings)
         if after_first:
             self.reward_grid = gtnp.create_reward_after_first(paths)
-        self.reward_grid = gtnp.create_reward_first_step(buildings)
-        print(self.map)
+        else:
+            self.reward_grid = gtnp.create_reward_first_step(buildings)
+
+        # print(self.map)
 
         # Create P_0 for starting state distribution
         self.P_0 = np.array([0 for _ in range(self.num_states)])
@@ -82,14 +84,17 @@ class Qlearning:
             for y in range(self.height):
                 neighbors = self.valid_neighbours(x, y)
                 if x == 1 and y == 0:
-                    print(self.map)
-                    print(neighbors)
+                    # print(self.map)
+                    #  print(neighbors)
+                     print("")
+
                 for action in range(self.num_actions):
                     if action in neighbors:
                         # print(str(neighbors[action][0] * self.width + neighbors[action][1]) + "\n_____")
                         # print(str(neighbors[action][1]) + "\n_____")
                         self.T[neighbors[action][0] * self.width + neighbors[action][
                             1], x * self.width + y, action] = 1
+                            # Add an indented block of code here
 
     def is_action_valid(self, current_state, action):
         transition_probs = self.T[:, current_state, action]
@@ -105,6 +110,8 @@ class Qlearning:
         x, y = self.current_coordinates(current_state)
         neighbors = self.all_neighbours(x, y)
         visited_coordinates = []
+        
+        # print("visited buildings: ", visited_buildings)
         # get all coordinates of the current visited buildings
         for building in visited_buildings:
             for i in range(building.get_size()[0]):
@@ -120,9 +127,11 @@ class Qlearning:
                     for i in range(building.get_size()[0]):
                         for j in range(building.get_size()[1]):
                             building_coordinates.append((building.get_position()[0] + i, building.get_position()[1] + j))
+                            # building_coordinates.append((building.get_position()[0] + i+1, building.get_position()[1] + j+1))
+                            # building_coordinates.append((building.get_position()[0] + i-1, building.get_position()[1] + j-1))
                     # if the neighbor is part of the building, add the building to the visited buildings
                     if neighbor in building_coordinates:
-                        print("unvisited neighbor found: ", neighbor)
+                        # print("unvisited neighbor found: ", neighbor)
                         visited_buildings.append(building)
                         break
         return visited_buildings
@@ -167,8 +176,16 @@ class Qlearning:
 
                 while not self.is_action_valid(observation, action):
                     action = np.random.choice(np.arange(self.num_actions))
-
+                
+                #if the action involves moving around the building, add a penalty
+                    
                 next_observation, reward, terminated, truncated, info = self.env.step(action)
+
+                 #if the action involves moving around the building, add a penalty
+                # if self.move_near_visited_building(next_observation, visited_buildings):
+                #         reward = 20
+
+     
                 # print(next_observation, observation)
                 # print(action)
                 # print(self.reward_grid[next_observation, observation, action])
@@ -196,3 +213,23 @@ class Qlearning:
 
         optimal_policy = np.argmax(Q, axis=1)
         return optimal_policy, self.starting_index
+
+
+    def move_near_visited_building(self, next_observation, visited_buildings):
+        x, y = self.current_coordinates(next_observation)
+        neighbors = self.all_neighbours(x, y)
+        visited_coordinates = []
+        
+        new_X= next_observation // self.height
+        new_Y = next_observation % self.width
+        
+        # print("new coordinates: ", new_X, new_Y)
+        # get all coordinates of the current visited buildings
+        for building in visited_buildings:
+            x= building.get_position()[0]
+            y = building.get_position()[1]
+
+            if(new_X == x+1 or new_X == x-1 or new_Y == y+1 or new_Y == y-1):
+                return True
+                    
+        return False;            

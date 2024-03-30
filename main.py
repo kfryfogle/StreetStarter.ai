@@ -72,6 +72,7 @@ def main():
     buildings = []
     rotated = False
     selected_building_type = House
+    paths = np.zeros((constants.GRID_WIDTH, constants.GRID_HEIGHT))
     while True: 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -92,7 +93,8 @@ def main():
                         after_first = False
                     qlearning = Qlearning(constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings, after_first, paths)
                     best_policy, starting_index = qlearning.train(100)
-                    print(best_policy.tolist())
+                    #print(best_policy.tolist())
+                    print(starting_index)
                     # print(Q.tolist())
                     paint(best_policy, starting_index % constants.GRID_WIDTH, starting_index // constants.GRID_WIDTH, paths)
             elif event.type == pygame.MOUSEBUTTONDOWN:
