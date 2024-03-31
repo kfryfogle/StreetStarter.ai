@@ -121,30 +121,8 @@ class PyGametoNumpy:
         self.reward_grid[bottom_edges[0], bottom_edges[0] - 1, 3] = 200
         self.reward_grid[right_edges[-1], bottom_edges[-1] + 1, 0] = 200
         self.reward_grid[bottom_edges[-1], bottom_edges[-1] + 1, 2] = 200
-        # # Update rewards around the first building
-        # for i in range(first_building_height):
-        #     # Left edge
-        #     if first_building_x - 2 >= 0:
-        #         self.reward_grid[first_building_x - 1, first_building_x - 2,
-        #         3] = 200  # Right action towards the building
-        #     # Right edge
-        #     if first_building_x + first_building_width + 1 < grid_width:
-        #         self.reward_grid[first_building_x + first_building_width, first_building_x + first_building_width + 1,
-        #         2] = 200  # Left action towards the building
-        #
-        # for i in range(first_building_width):
-        #     # Top edge
-        #     if first_building_y - 2 >= 0:
-        #         self.reward_grid[first_building_y - 2, first_building_y - 1,
-        #         1] = 200  # Down action towards the building
-        #     # Bottom edge
-        #     if first_building_y + first_building_height + 1 < grid_height:
-        #         self.reward_grid[first_building_y + first_building_height, first_building_y + first_building_height + 1,
-        #         0] = 200  # Up action towards the building
-        #
-        # self.reward_grid[first_building_y - 1, ]
-
         return self.reward_grid
+      
         # for i in range(constants.GRID_HEIGHT):
         #     for j in range(constants.GRID_WIDTH):
         #         self.reward_grid[i][j] = -1
@@ -176,6 +154,47 @@ class PyGametoNumpy:
         #             first_building_to_connect_x + i] = 200
         #
         # return self.reward_grid
+    
+    def create_reward_after_first(self, paths):
+        rewards = paths.copy()
+        rewards[rewards == 1] = 200
+        rewards[rewards == 0] = -1
+        return rewards
+        # grid = np.array(policy).reshape(constants.GRID_WIDTH, constants.GRID_HEIGHT)
+        # self.reward_grid = np.zeros((self.num_states, self.num_states, self.num_actions))
+        # num_actions = 4
+        # for i in range(self.num_states):
+        #     for j in range(self.num_states):
+        #         for action in range(num_actions):
+        #             self.reward_grid[i, j, action] = -1
+
+        # # Map the values in the grid according to the specified mapping
+        # mapping = {0: 'up', 1: 'down', 2: 'left', 3: 'right'}
+        # direction_array = np.vectorize(grid)
+
+        # current_x, current_y = start_x, start_y
+        # i = 0
+        # while i < 70:
+        #     direction = direction_array[current_y, current_x]
+        #     # color = constants.BLUE
+        #     # rect = pygame.Rect(current_x * constants.GRID_SIZE, current_y * constants.GRID_SIZE,
+        #     #                 constants.GRID_SIZE, constants.GRID_SIZE)
+        #     # pygame.draw.rect(screen, color, rect)
+        #     self.reward_grid[current_x,current_y, direction] = 200
+        #     direction = map.get(direction)
+
+        #     # Update current position based on direction
+        #     if direction == 'up' and current_y > 0:
+        #         current_y -= 1
+        #     elif direction == 'down' and current_y < direction_array.shape[0] - 1:
+        #         current_y += 1
+        #     elif direction == 'left' and current_x > 0:
+        #         current_x -= 1
+        #     elif direction == 'right' and current_x < direction_array.shape[1] - 1:
+        #         current_x += 1
+        #     i += 1        
+        # return self.reward_grid
+
 
     def convert_to_numpy(self):
         print("Enter Key Pressed")
