@@ -157,7 +157,7 @@ class Qlearning:
         observation, info = self.env.reset()
         optimal_policy = np.zeros(self.num_states)
 
-        for i in tqdm(range(num_episodes)):
+        for i in tqdm(range(1)):
             observation, info = self.env.reset()
             visited_buildings = []
             while True:
@@ -180,6 +180,7 @@ class Qlearning:
                 #if the action involves moving around the building, add a penalty
                     
                 next_observation, reward, terminated, truncated, info = self.env.step(action)
+                print(reward,next_observation,observation,action)
 
                  #if the action involves moving around the building, add a penalty
                 # if self.move_near_visited_building(next_observation, visited_buildings):

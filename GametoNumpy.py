@@ -76,8 +76,7 @@ class PyGametoNumpy:
                     self.reward_grid[i, j, action] = -1  # Default reward
 
 
-        print(buildings)
-        for building in buildings:    
+        for building in buildings[1:]:    
             x, y = building.get_position()
             w, h = building.get_size()
             reward = 200
@@ -88,8 +87,12 @@ class PyGametoNumpy:
             bottom_edges = []
             
             q = queue.Queue()
+            visited = set()
 
             state_of_building = x + grid_width * y
+            print(x,y)
+            print(state_of_building)
+            visited.add(state_of_building)
             q.put((state_of_building, 0))
 
             while not q.empty():
@@ -103,17 +106,37 @@ class PyGametoNumpy:
                 left_edges = parent-1
                 right_edges = parent+1
 
-                q.put((top_edges, distance+1))
-                q.put((bottom_edges, distance+1))
-                q.put((left_edges, distance+1))
-                q.put((right_edges, distance+1))
+                if top_edges >= 0 and top_edges not in visited :
+                    #print("top",parent,top_edges)
+                    visited.add(top_edges)
+                    q.put((top_edges, distance+1))
 
-                self.reward_grid[parent, top_edges, 1] = reward - distance *50
-                self.reward_grid[parent, bottom_edges, 0] = reward - distance *50
-                self.reward_grid[left_edges, parent, 3] = reward - distance *50
-                self.reward_grid[right_edges, parent, 2] = reward - distance *50
+                if bottom_edges < self.num_states and bottom_edges not in visited :    
+                    #print("bottom",parent,bottom_edges)
+                    visited.add(bottom_edges)
+                    q.put((bottom_edges, distance+1))
 
-            
+                if parent // grid_width != 0 and left_edges not in visited :     
+                    #print("left",parent,left_edges)
+                    visited.add(left_edges)
+                    q.put((left_edges, distance+1))
+
+                if parent % grid_width != grid_width-1 and right_edges not in visited:
+                     #print("right",parent,right_edges)
+                     visited.add(right_edges)
+                     q.put((right_edges, distance+1))
+
+                if distance == 0:
+                    continue
+
+
+                self.reward_grid[parent, top_edges, 1] = reward - (distance-1) *50
+                self.reward_grid[parent, bottom_edges, 0] = reward - (distance-1) *50
+                self.reward_grid[parent, left_edges, 3] = reward - (distance-1) *50
+                self.reward_grid[ parent,right_edges, 2] = reward - (distance-1) *50
+
+
+        print(self.reward_grid[state_of_building, state_of_building-1, 3])    
         # Extract building information
         # first_building_width = buildings[-1].get_size()[0]
         # first_building_height = buildings[-1].get_size()[1]
