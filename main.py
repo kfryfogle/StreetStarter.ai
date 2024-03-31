@@ -35,23 +35,29 @@ def check_if_out_of_bounds(new_building):
     return False
 
 
-def paint(policy, start_x, start_y, paths):
-    # TODO: cut off extra path
+def paint(policy, start_x, start_y, paths, ending_point):
     grid = np.array(policy).reshape(constants.GRID_WIDTH, constants.GRID_HEIGHT)
+    ending_point_x = ending_point % constants.GRID_WIDTH
+    ending_point_y = ending_point // constants.GRID_WIDTH
 
     # Map the values in the grid according to the specified mapping
     mapping = {0: 'up', 1: 'down', 2: 'left', 3: 'right'}
     direction_array = np.vectorize(mapping.get)(grid)
 
+    print("ending ", ending_point_x, ending_point_y)
+
     current_x, current_y = start_x, start_y
-    i = 0
-    while i < 70:
+
+    while paths[current_x, current_y] != 1:
         direction = direction_array[current_y, current_x]
         color = constants.BLUE
         paths[current_x, current_y] = 1
         rect = pygame.Rect(current_x * constants.GRID_SIZE, current_y * constants.GRID_SIZE,
                            constants.GRID_SIZE, constants.GRID_SIZE)
         pygame.draw.rect(screen, color, rect)
+
+        if current_x == ending_point_x and current_y == ending_point_y:
+            break
 
         # Update current position based on direction
         if direction == 'up' and current_y > 0:
@@ -62,7 +68,7 @@ def paint(policy, start_x, start_y, paths):
             current_x -= 1
         elif direction == 'right' and current_x < direction_array.shape[1] - 1:
             current_x += 1
-        i += 1
+
 
     # Update the display
     pygame.display.flip()
@@ -72,7 +78,7 @@ def paint(policy, start_x, start_y, paths):
 def main():
     buildings = []
     rotated = False
-    selected_building_type = Building
+    selected_building_type = House
     paths = np.zeros((constants.GRID_WIDTH, constants.GRID_HEIGHT))
     while True:
         for event in pygame.event.get():
@@ -93,10 +99,10 @@ def main():
                     else:
                         after_first = False
                     qlearning = Qlearning(constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings, after_first, paths)
-                    best_policy, starting_index = qlearning.train(100)
+                    best_policy, starting_index, ending_point = qlearning.train(100)
                     print(best_policy.tolist())
                     # print(Q.tolist())
-                    paint(best_policy, starting_index % constants.GRID_WIDTH, starting_index // constants.GRID_WIDTH, paths)
+                    paint(best_policy, starting_index % constants.GRID_WIDTH, starting_index // constants.GRID_WIDTH, paths, ending_point)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     x, y = event.pos
