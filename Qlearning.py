@@ -44,8 +44,10 @@ class Qlearning:
             self.reward_grid = gtnp.create_reward_after_first(paths)
             self.create_transition_matrix(paths)
         else:
-            self.reward_grid, left_edges, bottom_edges, top_edges, right_edges = gtnp.create_reward_first_step(buildings)
-            self.create_transition_matrix_first_step(left_edges, bottom_edges, top_edges, right_edges)
+            self.reward_grid, first_building_edges, left_edges, bottom_edges, top_edges, right_edges = gtnp.create_reward_first_step(
+                buildings)
+            self.create_transition_matrix_first_step(first_building_edges, left_edges, bottom_edges, top_edges,
+                                                     right_edges)
 
         # print(self.map)
 
@@ -58,16 +60,29 @@ class Qlearning:
         # print(self.reward_grid)
         self.env = gym.make('matrix_mdp/MatrixMDP-v0', p_0=self.P_0, r=self.reward_grid, p=self.T)
 
-    def all_neighbours(self, i, j):
+    # def all_neighbours(self, i, j):
+    #     neighbours = {}
+    #     if i > 0:
+    #         neighbours[0] = (i - 1, j)
+    #     if i < self.width - 1:
+    #         neighbours[1] = (i + 1, j)
+    #     if j > 0:
+    #         neighbours[2] = (i, j - 1)
+    #     if j < self.height - 1:
+    #         neighbours[3] = (i, j + 1)
+    #     return neighbours
+
+    def all_neighbours(self, state):
         neighbours = {}
-        if i > 0:
-            neighbours[0] = (i - 1, j)
-        if i < self.width - 1:
-            neighbours[1] = (i + 1, j)
-        if j > 0:
-            neighbours[2] = (i, j - 1)
-        if j < self.height - 1:
-            neighbours[3] = (i, j + 1)
+        if state - self.width >= 0:
+            neighbours[0] = state - self.width
+        if state + self.width <= self.num_states - 1:
+            neighbours[1] = state + self.width
+        if state - 1 >= 0:
+            neighbours[2] = state - 1
+        if state + 1 <= self.num_states - 1:
+            neighbours[3] = state + 1
+        # neighbours = {0: state - self.width, 1: state + self.width, 2: state - 1, 3: state + 1}
         return neighbours
 
     def valid_neighbours(self, i, j):
@@ -97,8 +112,9 @@ class Qlearning:
                     if action in neighbors:
                         # print(str(neighbors[action][0] * self.width + neighbors[action][1]) + "\n_____")
                         # print(str(neighbors[action][1]) + "\n_____")
-                        self.T[neighbors[action][0] * self.width + neighbors[action][
-                            1], x * self.width + y, action] = 1
+                        # self.T[neighbors[action][0] * self.width + neighbors[action][
+                        #     1], x * self.width + y, action] = 1
+                        self.T[neighbors[action], x * self.width + y, action] = 1
 
         indices = np.where(paths == 1)
         x_coord = indices[0]
@@ -107,19 +123,21 @@ class Qlearning:
             state = x_coord[i] + (constants.GRID_WIDTH * y_coord[i])
             self.T[:, state, :] = 0
 
-    def create_transition_matrix_first_step(self, left_edges, bottom_edges, top_edges, right_edges):
+    def create_transition_matrix_first_step(self, first_building_edges, left_edges, bottom_edges, top_edges,
+                                            right_edges):
+        # print(left_edges)
+        # print(right_edges)
+        # print(top_edges)
+        # print(bottom_edges)
         for x in range(self.width):
             for y in range(self.height):
-                neighbors = self.valid_neighbours(x, y)
+                neighbors = self.all_neighbours(x * self.width + y)
                 state = x * self.width + y
-                if state in left_edges or state in bottom_edges or state in top_edges or state in right_edges:
+                if state in first_building_edges:
                     continue
                 for action in range(self.num_actions):
                     if action in neighbors:
-                        # print(str(neighbors[action][0] * self.width + neighbors[action][1]) + "\n_____")
-                        # print(str(neighbors[action][1]) + "\n_____")
-                        self.T[neighbors[action][0] * self.width + neighbors[action][
-                            1], x * self.width + y, action] = 1
+                        self.T[neighbors[action], x * self.width + y, action] = 1
 
     def is_action_valid(self, current_state, action):
         transition_probs = self.T[:, current_state, action]
@@ -168,16 +186,44 @@ class Qlearning:
                     building_coordinates.append((building.get_position()[0] + i, building.get_position()[1] + j))
 
     def train(self, num_episodes):
-        Q = np.zeros((self.num_states, self.num_actions))
-        num_updates = np.zeros((self.num_states, self.num_actions))
-        print("T: ", self.T[34, 44, 0])
+        # Q = np.zeros((self.num_states, self.num_actions))
+        complements = {
+            0: 1,
+            1: 0,
+            2: 3,
+            3: 2
+        }
+        def action_hits_wall(state_from, action):
+            movements = {
+                0: (0, -1),  # Move up
+                1: (0, 1),  # Move down
+                2: (-1, 0),  # Move left
+                3: (1, 0)  # Move right
+            }
+            row, col = state_from % self.width, state_from // self.width
+            # print(row, col)
+            movement = movements[action]
+            next_row = row + movement[0]
+            next_col = col + movement[1]
+            #             print(next_row, next_col)
+            if next_row < 0 or next_row >= self.height or next_col < 0 or next_col >= self.width:
+                return True
+            return False
 
-        gamma = 0.95
-        epsilon = 0.94
+        Q = np.random.uniform(low=-0.001, high=0.001, size=(self.num_states, self.num_actions))
+        num_updates = np.zeros((self.num_states, self.num_actions))
+
+        gamma = 0.97
+        epsilon = 0.97
 
         observation, info = self.env.reset()
         ending_points = set()
         optimal_policy = np.full(self.num_states, -1)
+
+        for state_from in range(self.num_states):
+            for action in range(self.num_actions):
+                if action_hits_wall(state_from, action):
+                    Q[state_from, action] = -1000
 
         for i in tqdm(range(num_episodes)):
             observation, info = self.env.reset()
@@ -186,10 +232,10 @@ class Qlearning:
             while True:
                 # print("observation state, coordinates: ", observation, self.current_coordinates(observation))
                 # mark adjacent buildings as visited
-                visited_buildings = self.check_adjacency(observation, visited_buildings)
-                # if all buildings are visited, break
-                if len(visited_buildings) == len(self.buildings):
-                    break
+                # visited_buildings = self.check_adjacency(observation, visited_buildings)
+                # # if all buildings are visited, break
+                # if len(visited_buildings) == len(self.buildings):
+                #     break
 
                 explr_explo = random.choices([1, 0], weights=[epsilon, 1 - epsilon], k=1)
                 if explr_explo[0] == 1:
@@ -201,44 +247,52 @@ class Qlearning:
                     action = np.random.choice(np.arange(self.num_actions))
 
                 # if the action involves moving around the building, add a penalty
+                if not action_hits_wall(observation, action):
+                    next_observation, reward, terminated, truncated, info = self.env.step(action)
+                    total_reward += reward
+                    # print(reward, next_observation, observation, action)
 
-                next_observation, reward, terminated, truncated, info = self.env.step(action)
-                total_reward += reward
-                # print(reward, next_observation, observation, action)
+                    # if the action involves moving around the building, add a penalty
+                    # if self.move_near_visited_building(next_observation, visited_buildings):
+                    #         reward = 20
 
-                # if the action involves moving around the building, add a penalty
-                # if self.move_near_visited_building(next_observation, visited_buildings):
-                #         reward = 20
+                    # print(next_observation, observation)
+                    # print(action)
+                    # print(self.reward_grid[next_observation, observation, action])
+                    # print(reward)
+                    # print("___________________________________")
 
-                # print(next_observation, observation)
-                # print(action)
-                # print(self.reward_grid[next_observation, observation, action])
-                # print(reward)
-                # print("___________________________________")
+                    eta = 1 / (1 + num_updates[observation, action])
+                    best_next_action = np.argmax(Q[next_observation])
+                    # Q[observation, action] += eta * (
+                    #         reward + gamma * Q[next_observation, best_next_action] - Q[observation, action])
 
-                eta = 1 / (1 + num_updates[observation, action])
-                best_next_action = np.argmax(Q[next_observation])
-                Q[observation, action] += eta * (
-                        reward + gamma * Q[next_observation, best_next_action] - Q[observation, action])
-                num_updates[observation, action] += 1
-                observation = next_observation
+                    Q[observation, action] = ((1 - eta) * (Q[observation, action]) +
+                                              eta * (reward + gamma * Q[next_observation, best_next_action]))
+                    Q[next_observation, complements[action]] = -1000
+                    num_updates[observation, action] += 1
+                    observation = next_observation
 
-                if terminated or truncated:
-                    # print("point: ", observation)
-                    ending_points.add((observation, total_reward))
-                    break
+                    # if terminated or truncated:
+                    #     # print("point: ", observation)
+                    #     ending_points.add((observation, total_reward))
+                    #     break
 
-                # if self.after_first:
-                # if reward > 0:
-                #     # print("point: ", observation)
-                #     ending_point = observation
-                #     break
+                    if reward > 0:
+                        ending_points.add((observation, total_reward))
+                        break
+
+                    # if self.after_first:
+                    # if reward > 0:
+                    #     # print("point: ", observation)
+                    #     ending_point = observation
+                    #     break
 
             epsilon *= 0.9999
-            print("Reward: ", total_reward)
 
         optimal_policy = np.argmax(Q, axis=1)
         final_ending_point = max(ending_points, key=lambda x: x[1])[0]
+        print(ending_points)
         return optimal_policy, self.starting_index, final_ending_point
 
     def move_near_visited_building(self, next_observation, visited_buildings):

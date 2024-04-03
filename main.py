@@ -44,7 +44,7 @@ def paint(policy, start_x, start_y, paths, ending_point):
     mapping = {0: 'up', 1: 'down', 2: 'left', 3: 'right'}
     direction_array = np.vectorize(mapping.get)(grid)
 
-    print("ending ", ending_point_x, ending_point_y)
+    # print("ending ", ending_point_x, ending_point_y)
 
     current_x, current_y = start_x, start_y
 
@@ -99,9 +99,8 @@ def main():
                     else:
                         after_first = False
                     qlearning = Qlearning(constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings, after_first, paths)
-                    best_policy, starting_index, ending_point = qlearning.train(100)
+                    best_policy, starting_index, ending_point = qlearning.train(10000)
                     print(best_policy.tolist())
-                    # print(Q.tolist())
                     paint(best_policy, starting_index % constants.GRID_WIDTH, starting_index // constants.GRID_WIDTH, paths, ending_point)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:

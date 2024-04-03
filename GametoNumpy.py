@@ -35,7 +35,7 @@ class PyGametoNumpy:
         #     queue = deque()
         #     visited = set()
         #
-        
+
         #     for bx in range(x, x + w):
         #         for by in range(y, y + h):
         #             add_surrounding_cells_to_queue(bx, by, 0)
@@ -75,75 +75,79 @@ class PyGametoNumpy:
         #         for action in range(num_actions):
         #             self.reward_grid[i, j, action] = -1  # Default reward
         #
+        # # for building in buildings[1:]:
+        # building = buildings[1]
+        # x, y = building.get_position()
+        # w, h = building.get_size()
+        # reward = 200
         #
-        # for building in buildings[1:]:
-        #     x, y = building.get_position()
-        #     w, h = building.get_size()
-        #     reward = 200
+        # left_edges = []
+        # right_edges = []
+        # top_edges = []
+        # bottom_edges = []
         #
-        #     left_edges = []
-        #     right_edges = []
-        #     top_edges = []
-        #     bottom_edges = []
+        # q = queue.Queue()
+        # visited = set()
         #
-        #     q = queue.Queue()
-        #     visited = set()
+        # state_of_building = x + grid_width * y
+        # print(x, y)
+        # print(state_of_building)
+        # visited.add(state_of_building)
+        # q.put((state_of_building, 0))
         #
-        #     state_of_building = x + grid_width * y
-        #     print(x,y)
-        #     print(state_of_building)
-        #     visited.add(state_of_building)
-        #     q.put((state_of_building, 0))
+        # while not q.empty():
+        #     parent, distance = q.get()
         #
-        #     while not q.empty():
-        #         parent, distance = q.get()
+        #     if distance == 2:
+        #         break
         #
-        #         if distance == 2:
-        #             break
+        #     top_edges = parent - grid_width
+        #     bottom_edges = parent + grid_width
+        #     left_edges = parent - 1
+        #     right_edges = parent + 1
         #
-        #         top_edges = parent-grid_width
-        #         bottom_edges = parent+grid_width
-        #         left_edges = parent-1
-        #         right_edges = parent+1
+        #     if top_edges >= 0 and top_edges not in visited:
+        #         # print("top",parent,top_edges)
+        #         visited.add(top_edges)
+        #         q.put((top_edges, distance + 1))
         #
-        #         if top_edges >= 0 and top_edges not in visited :
-        #             #print("top",parent,top_edges)
-        #             visited.add(top_edges)
-        #             q.put((top_edges, distance+1))
+        #     if bottom_edges < self.num_states and bottom_edges not in visited:
+        #         # print("bottom",parent,bottom_edges)
+        #         visited.add(bottom_edges)
+        #         q.put((bottom_edges, distance + 1))
         #
-        #         if bottom_edges < self.num_states and bottom_edges not in visited :
-        #             #print("bottom",parent,bottom_edges)
-        #             visited.add(bottom_edges)
-        #             q.put((bottom_edges, distance+1))
+        #     if parent // grid_width != 0 and left_edges not in visited:
+        #         # print("left",parent,left_edges)
+        #         visited.add(left_edges)
+        #         q.put((left_edges, distance + 1))
         #
-        #         if parent // grid_width != 0 and left_edges not in visited :
-        #             #print("left",parent,left_edges)
-        #             visited.add(left_edges)
-        #             q.put((left_edges, distance+1))
+        #     if parent % grid_width != grid_width - 1 and right_edges not in visited:
+        #         # print("right",parent,right_edges)
+        #         visited.add(right_edges)
+        #         q.put((right_edges, distance + 1))
         #
-        #         if parent % grid_width != grid_width-1 and right_edges not in visited:
-        #              #print("right",parent,right_edges)
-        #              visited.add(right_edges)
-        #              q.put((right_edges, distance+1))
+        #     if distance == 0:
+        #         continue
         #
-        #         if distance == 0:
-        #             continue
+        #     if 0 <= parent <= self.num_states - 1:
+        #         if top_edges >= 0:
+        #             self.reward_grid[parent, top_edges, 1] = reward - (distance - 1) * 50
+        #         if bottom_edges <= self.num_states - 1:
+        #             self.reward_grid[parent, bottom_edges, 0] = reward - (distance - 1) * 50
+        #         if left_edges >= 0:
+        #             self.reward_grid[parent, left_edges, 3] = reward - (distance - 1) * 50
+        #         if right_edges <= self.num_states - 1:
+        #             self.reward_grid[parent, right_edges, 2] = reward - (distance - 1) * 50
         #
-        #
-        #         self.reward_grid[parent, top_edges, 1] = reward - (distance-1) *50
-        #         self.reward_grid[parent, bottom_edges, 0] = reward - (distance-1) *50
-        #         self.reward_grid[parent, left_edges, 3] = reward - (distance-1) *50
-        #         self.reward_grid[ parent,right_edges, 2] = reward - (distance-1) *50
-        #
-        #
-        # print(self.reward_grid[state_of_building, state_of_building-1, 3])
-        # Extract building information
+        # print(self.reward_grid[state_of_building, state_of_building - 1, 3])
+        # # Extract building information
         # first_building_width = buildings[-1].get_size()[0]
         # first_building_height = buildings[-1].get_size()[1]
         # first_building_x = buildings[-1].get_position()[0]
         # first_building_y = buildings[-1].get_position()[1]
-        # print("first building:-",first_building_x, first_building_y, first_building_width, first_building_height)
-        
+        # print("first building:-", first_building_x, first_building_y, first_building_width, first_building_height)
+        #
+        # return self.reward_grid, visited
 
         # left_edges = []
         # right_edges = []
@@ -185,8 +189,8 @@ class PyGametoNumpy:
         # self.reward_grid[bottom_edges[0], bottom_edges[0] - 1, 3] = 200
         # self.reward_grid[right_edges[-1], bottom_edges[-1] + 1, 0] = 200
         # self.reward_grid[bottom_edges[-1], bottom_edges[-1] + 1, 2] = 200
-        #print(self.reward_grid)
-      
+        # print(self.reward_grid)
+
         # for i in range(constants.GRID_HEIGHT):
         #     for j in range(constants.GRID_WIDTH):
         #         self.reward_grid[i][j] = -1
@@ -218,10 +222,13 @@ class PyGametoNumpy:
         #             first_building_to_connect_x + i] = 200
         #
         # return self.reward_grid
+        # _________________________________________________________________
 
         num_actions = 4  # Up, Down, Left, Right
         grid_height = constants.GRID_HEIGHT
         grid_width = constants.GRID_WIDTH
+
+
 
         # Initialize the 3D reward matrix with default reward values
         self.reward_grid = np.zeros((self.num_states, self.num_states, self.num_actions))
@@ -233,6 +240,10 @@ class PyGametoNumpy:
                     self.reward_grid[i, j, action] = -1  # Default reward
 
         # Extract building information
+        zeroth_building_width = buildings[0].get_size()[0]
+        zeroth_building_height = buildings[0].get_size()[1]
+        zeroth_building_x = buildings[0].get_position()[0]
+        zeroth_building_y = buildings[0].get_position()[1]
         first_building_width = buildings[1].get_size()[0]
         first_building_height = buildings[1].get_size()[1]
         first_building_x = buildings[1].get_position()[0]
@@ -242,6 +253,10 @@ class PyGametoNumpy:
         right_edges = []
         top_edges = []
         bottom_edges = []
+        zeroth_building_left_edges = []
+        zeroth_building_right_edges = []
+        zeroth_building_top_edges = []
+        zeroth_building_bottom_edges = []
         # Get left and right edges
         for i in range(first_building_height):
             left_edges.append(first_building_x + grid_width * first_building_y + i * grid_width - 1)
@@ -260,28 +275,79 @@ class PyGametoNumpy:
 
         for i in range(len(left_edges)):
             if left_edges[i] - 1 >= grid_width * (i + first_building_y):
-                self.reward_grid[left_edges[i], left_edges[i] - 1, 3] = 200
+                self.reward_grid[left_edges[i], left_edges[i] - 1, 3] = 2000
             if right_edges[i] + 1 <= grid_width * (i + first_building_y + 1) - 1:
-                self.reward_grid[right_edges[i], right_edges[i] + 1, 2] = 200
+                self.reward_grid[right_edges[i], right_edges[i] + 1, 2] = 2000
 
         for i in range(len(top_edges)):
             if top_edges[i] - grid_width >= 0:
-                self.reward_grid[top_edges[i], top_edges[i] - grid_width, 1] = 200
+                self.reward_grid[top_edges[i], top_edges[i] - grid_width, 1] = 2000
             if bottom_edges[i] + grid_width <= self.num_states - 1:
-                self.reward_grid[bottom_edges[i], bottom_edges[i] + grid_width, 0] = 200
+                self.reward_grid[bottom_edges[i], bottom_edges[i] + grid_width, 0] = 2000
 
         # TODO: fix when one of these indices are out of bounds eg. when building is along an edge of grid
-        self.reward_grid[top_edges[0], top_edges[0] - 1, 3] = 200
-        self.reward_grid[top_edges[-1], top_edges[-1] + 1, 2] = 200
-        self.reward_grid[left_edges[0], top_edges[0] - 1, 1] = 200
-        self.reward_grid[right_edges[0], top_edges[-1] + 1, 1] = 200
-        self.reward_grid[left_edges[-1], bottom_edges[0] - 1, 0] = 200
-        self.reward_grid[bottom_edges[0], bottom_edges[0] - 1, 3] = 200
-        self.reward_grid[right_edges[-1], bottom_edges[-1] + 1, 0] = 200
-        self.reward_grid[bottom_edges[-1], bottom_edges[-1] + 1, 2] = 200
-        print(self.reward_grid[54, 53, 3])
-        return self.reward_grid, left_edges, bottom_edges, top_edges, right_edges
-    
+        self.reward_grid[top_edges[0], top_edges[0] - 1, 3] = 2000
+        self.reward_grid[top_edges[-1], top_edges[-1] + 1, 2] = 2000
+        self.reward_grid[left_edges[0], top_edges[0] - 1, 1] = 2000
+        self.reward_grid[right_edges[0], top_edges[-1] + 1, 1] = 2000
+        self.reward_grid[left_edges[-1], bottom_edges[0] - 1, 0] = 2000
+        self.reward_grid[bottom_edges[0], bottom_edges[0] - 1, 3] = 2000
+        self.reward_grid[right_edges[-1], bottom_edges[-1] + 1, 0] = 2000
+        self.reward_grid[bottom_edges[-1], bottom_edges[-1] + 1, 2] = 2000
+
+        first_building_edges = left_edges + right_edges + top_edges + bottom_edges
+
+        # Get left and right edges
+        for i in range(zeroth_building_height):
+            zeroth_building_left_edges.append(zeroth_building_x + grid_width * zeroth_building_y + i * grid_width - 1)
+            zeroth_building_right_edges.append(
+                zeroth_building_x + grid_width * zeroth_building_y + i * grid_width + zeroth_building_width)
+
+        # Get top and bottom edges
+        for i in range(zeroth_building_width):
+            zeroth_building_top_edges.append(zeroth_building_x + grid_width * zeroth_building_y - grid_width + i)
+            zeroth_building_bottom_edges.append(
+                zeroth_building_x + grid_width * zeroth_building_y + zeroth_building_height * grid_width + i)
+
+        for i in range(len(zeroth_building_left_edges)):
+            if zeroth_building_left_edges[i] - 1 >= grid_width * (i + zeroth_building_y):
+                self.reward_grid[zeroth_building_left_edges[i] + 1, zeroth_building_left_edges[i], 3] = -2000
+            if zeroth_building_right_edges[i] + 1 <= grid_width * (i + zeroth_building_y + 1) - 1:
+                self.reward_grid[zeroth_building_right_edges[i] - 1, zeroth_building_right_edges[i], 2] = -2000
+
+        for i in range(len(zeroth_building_top_edges)):
+            if zeroth_building_top_edges[i] - grid_width >= 0:
+                self.reward_grid[zeroth_building_top_edges[i] + grid_width, zeroth_building_top_edges[i], 1] = -2000
+            if zeroth_building_bottom_edges[i] + grid_width <= self.num_states - 1:
+                self.reward_grid[
+                    zeroth_building_bottom_edges[i] - grid_width, zeroth_building_bottom_edges[i], 0] = -2000
+
+        # for state_from in range(self.num_states):
+        #     for action in range(self.num_actions):
+        #         if action_hits_wall(state_from, action):
+        #             self.reward_grid[:, state_from, action] = -10
+
+        # for i in range(grid_width):
+        #     if i != grid_width - 1:
+        #         self.reward_grid[i + 1, i, 3] = 1
+        #     if i != 0:
+        #         self.reward_grid[i - 1, i, 2] = 1
+        #     if i != i + self.num_states - grid_width - 1:
+        #         self.reward_grid[i + self.num_states - grid_width + 1, i, 3] = 1
+        #     if i != i + self.num_states - grid_width - grid_width:
+        #         self.reward_grid[i + self.num_states - grid_width - 1, i, 2] = 1
+        #
+        # for i in range(grid_height):
+        #     if i != 0:
+        #         self.reward_grid[i * grid_width - 1, i * grid_width, 2] = -2000
+        #     self.reward_grid[i * grid_width - 1, i * grid_width, 2] = -2000
+        #     self.reward_grid[i * grid_width - 1, i * grid_width, 2] = -2000
+        #     self.reward_grid[i * grid_width, i * grid_width + 1, 3] = -2000
+        # print(self.reward_grid[119, 120, 2])
+
+        return (self.reward_grid, first_building_edges, zeroth_building_left_edges,
+                zeroth_building_bottom_edges, zeroth_building_top_edges, zeroth_building_right_edges)
+
     def create_reward_after_first(self, paths):
         self.reward_grid = np.full((self.num_states, self.num_states, self.num_actions), -1)
         indices = np.where(paths == 1)
@@ -327,7 +393,6 @@ class PyGametoNumpy:
         #         current_x += 1
         #     i += 1
         # return self.reward_grid
-
 
     def convert_to_numpy(self):
         print("Enter Key Pressed")

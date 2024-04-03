@@ -8,8 +8,8 @@ BLUE = (0, 0, 255)
 
 # Grid
 GRID_SIZE = 40
-GRID_WIDTH = 10
-GRID_HEIGHT = 10
+GRID_WIDTH = 20
+GRID_HEIGHT = 20
 
 # Game
 BUILDINGS = {1: "House", 2: "Townhall"}
