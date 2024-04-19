@@ -7,9 +7,9 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 
 # Grid
-GRID_SIZE = 30
-GRID_WIDTH = 10
-GRID_HEIGHT = 10
+GRID_SIZE = 40
+GRID_WIDTH = 15
+GRID_HEIGHT = 15
 
 # Game
 BUILDINGS = {1: "House", 2: "Townhall"}
