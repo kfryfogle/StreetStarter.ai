@@ -44,8 +44,6 @@ def paint(policy, start_x, start_y, paths, ending_point):
     mapping = {0: 'up', 1: 'down', 2: 'left', 3: 'right'}
     direction_array = np.vectorize(mapping.get)(grid)
 
-    # print("ending ", ending_point_x, ending_point_y)
-
     current_x, current_y = start_x, start_y
 
     while paths[current_x, current_y] != 1:
@@ -99,14 +97,13 @@ def main():
                         if not np.any(paths):
                             # no_paths = True
                             qlearning = Qlearning(constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings, False, paths)
-                            # train_dqn(1000, constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings, after_first, paths)
-                            best_policy, starting_index, ending_point = qlearning.train(20000)
+                            best_policy, starting_index, ending_point = qlearning.train(100000)
                             paint(best_policy, starting_index % constants.GRID_WIDTH,
                                   starting_index // constants.GRID_WIDTH, paths, ending_point)
                             for i in range(len(buildings) - 1, 1, -1):
                                 qlearning = Qlearning(constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings[:i + 1],
                                                       True, paths)
-                                best_policy, starting_index, ending_point = qlearning.train(20000)
+                                best_policy, starting_index, ending_point = qlearning.train(100000)
                                 paint(best_policy, starting_index % constants.GRID_WIDTH,
                                       starting_index // constants.GRID_WIDTH, paths, ending_point)
                                 skip = True
@@ -116,10 +113,8 @@ def main():
                     if not skip:
                         qlearning = Qlearning(constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings, after_first,
                                               paths)
-                        # train_dqn(1000, constants.GRID_WIDTH, constants.GRID_HEIGHT, buildings, after_first, paths)
-                        best_policy, starting_index, ending_point = qlearning.train(20000)
+                        best_policy, starting_index, ending_point = qlearning.train(100000)
                         print(best_policy.tolist())
-                        # print(Q.tolist())
                         paint(best_policy, starting_index % constants.GRID_WIDTH,
                               starting_index // constants.GRID_WIDTH, paths, ending_point)
             elif event.type == pygame.MOUSEBUTTONDOWN:
