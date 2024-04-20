@@ -39,7 +39,6 @@ class Qlearning:
         self.map = gtnp.convert_to_numpy()
 
         self.T = np.zeros((self.num_states, self.num_states, self.num_actions))
-        # self.reward_grid = gtnp.create_rewards(buildings)
         if after_first:
             self.reward_grid = gtnp.create_reward_after_first(paths)
             self.create_transition_matrix(paths)
@@ -49,28 +48,41 @@ class Qlearning:
             self.create_transition_matrix_first_step(first_building_edges, left_edges, bottom_edges, top_edges,
                                                      right_edges)
 
-        # print(self.map)
-
         # Create P_0 for starting state distribution
         self.P_0 = np.array([0 for _ in range(self.num_states)])
-        self.starting_index = self.current_building.get_position()[0] - 1 + self.current_building.get_position()[
-            1] * self.width
+        self.starting_index = self.find_starting_index()
         self.P_0[self.starting_index] = 1
-        # print(self.P_0)
-        # print(self.reward_grid)
         self.env = gym.make('matrix_mdp/MatrixMDP-v0', p_0=self.P_0, r=self.reward_grid, p=self.T)
 
-    # def all_neighbours(self, i, j):
-    #     neighbours = {}
-    #     if i > 0:
-    #         neighbours[0] = (i - 1, j)
-    #     if i < self.width - 1:
-    #         neighbours[1] = (i + 1, j)
-    #     if j > 0:
-    #         neighbours[2] = (i, j - 1)
-    #     if j < self.height - 1:
-    #         neighbours[3] = (i, j + 1)
-    #     return neighbours
+    def find_starting_index(self):
+        # Find distance to right edge
+        dist_to_right = self.width - (self.current_building.get_position()[0] + self.current_building.get_size()[0])
+
+        # Find distance to left edge
+        dist_to_left = self.current_building.get_position()[0]
+
+        # Find distance to top edge
+        dist_to_top = self.current_building.get_position()[1]
+
+        # Find distance to bottom
+        dist_to_bottom = self.height - (self.current_building.get_position()[1] + self.current_building.get_size()[1])
+
+        max_dist = max(dist_to_left, dist_to_right, dist_to_top, dist_to_bottom)
+        print(dist_to_left, dist_to_right, dist_to_top, dist_to_bottom)
+        print(max_dist)
+        if max_dist == dist_to_left:
+            starting_index = self.current_building.get_position()[0] - 1 + self.current_building.get_position()[
+                1] * self.width
+        elif max_dist == dist_to_right:
+            starting_index = self.current_building.get_position()[0] + self.current_building.get_size()[0] + \
+                             self.current_building.get_position()[1] * self.width
+        elif max_dist == dist_to_top:
+            starting_index = self.current_building.get_position()[0] + (
+                        self.current_building.get_position()[1] - 1) * self.width
+        else:
+            starting_index = self.current_building.get_position()[0] + (
+                        self.current_building.get_position()[1] + self.current_building.get_size()[1]) * self.width
+        return starting_index
 
     def all_neighbours(self, state):
         neighbours = {}
@@ -82,7 +94,6 @@ class Qlearning:
             neighbours[2] = state - 1
         if state + 1 <= self.num_states - 1:
             neighbours[3] = state + 1
-        # neighbours = {0: state - self.width, 1: state + self.width, 2: state - 1, 3: state + 1}
         return neighbours
 
     def valid_neighbours(self, i, j):
@@ -132,12 +143,8 @@ class Qlearning:
                     if action in neighbors:
                         self.T[neighbors[action], state, action] = 1
 
-    def is_action_valid(self, current_state, action, visited):
-        # potential_next_obv = np.where(self.T[:, current_state, action] == 1)[0]
-        # if potential_next_obv.size == 0:
-        #     return False
+    def is_action_valid(self, current_state, action):
         transition_probs = self.T[:, current_state, action]
-        # if potential_next_obv[0] not in visited:
         if np.any(transition_probs > 0):
             return True
         else:
@@ -148,7 +155,7 @@ class Qlearning:
 
     def check_adjacency(self, current_state, visited_buildings):
         x, y = self.current_coordinates(current_state)
-        neighbors = self.all_neighbours(x, y)
+        neighbors = self.valid_neighbours(x, y)
         visited_coordinates = []
         # get all coordinates of the current visited buildings
         for building in visited_buildings:
@@ -168,7 +175,6 @@ class Qlearning:
                                 (building.get_position()[0] + i, building.get_position()[1] + j))
                     # if the neighbor is part of the building, add the building to the visited buildings
                     if neighbor in building_coordinates:
-                        # print("unvisited neighbor found: ", neighbor)
                         visited_buildings.append(building)
                         break
         return visited_buildings
@@ -225,7 +231,7 @@ class Qlearning:
                     action = np.argmax(Q[observation])
 
                 considered_actions = set()
-                while not self.is_action_valid(observation, action, visited) and len(considered_actions) < 4:
+                while not self.is_action_valid(observation, action) and len(considered_actions) < 4:
                     action = np.random.choice(np.arange(self.num_actions))
                     considered_actions.add(action)
 
@@ -275,4 +281,4 @@ class Qlearning:
             if new_X == x + 1 or new_X == x - 1 or new_Y == y + 1 or new_Y == y - 1:
                 return True
 
-        return False;
+        return False
